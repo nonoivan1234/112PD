@@ -5,19 +5,24 @@ using namespace std;
 
 int mostHighGrades(int threshold, int assignmentCnt, int gradeCnt, int grades[ ][50]);
 
+int highGradeCnt(int threshold, int gradeCnt, int grades[ ]){
+    int cnt = 0;
+    for(int i = 0; i < gradeCnt; i++){
+        if(grades[i] >= threshold){
+            cnt++;
+        }
+    }
+    return cnt;
+}
+
 int mostHighGrades(int threshold, int assignmentCnt, int gradeCnt, int grades[ ][50]){
-    int highGradeCnt = -1;
+    int hgc = -1;
 
     int ID=-1;
     for(int i = 0; i < gradeCnt; i++){
-        int cnt = 0;
-        for(int j = 0; j < assignmentCnt; j++){
-            if(grades[i][j] >= threshold){
-                cnt++;
-            }
-        }
-        if (cnt > highGradeCnt){
-            highGradeCnt = cnt;
+        int cnt = highGradeCnt(threshold, assignmentCnt, grades[i]);
+        if (cnt > hgc){
+            hgc = cnt;
             ID = i+1;
         }
     }
