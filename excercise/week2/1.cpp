@@ -5,10 +5,6 @@ using namespace std;
 
 int min(int a, int b);
 
-int min(int a, int b){
-    return a < b ? a : b;
-}
-
 signed main(){
     nono_is_handsome
 
@@ -18,4 +14,8 @@ signed main(){
     cout << min(a, b) << '\n';
 
     return 0;
+}
+
+int min(int a, int b){
+    return a < b ? a : b;
 }
