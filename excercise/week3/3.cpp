@@ -14,6 +14,15 @@ bool BinarySearch(int arr[], int n, int t){
     return false;
 }
 
+bool Bsearch(int arr[], int l, int r, int t){
+    if(l > r) return false;
+
+    int mid = l + (r-l)/2;
+    if(arr[mid] == t) return true;
+    else if(arr[mid] > t) return Bsearch(arr, l, mid - 1, t);
+    else return Bsearch(arr, mid + 1, r, t);
+}
+
 signed main(){
     nono_is_handsome
 
@@ -23,5 +32,6 @@ signed main(){
     int arr[n];
     for(int i = 0; i < n; i++) cin >> arr[i];
 
-    cout << BinarySearch(arr, n, t) << '\n';
+    // cout << BinarySearch(arr, n, t) << '\n';
+    cout << Bsearch(arr, 0, n - 1, t) << '\n';
 }
