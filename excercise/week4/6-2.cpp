@@ -6,14 +6,16 @@
 using namespace std;
 #define nono_is_handsome cin.tie(0); ios_base::sync_with_stdio(0);
 #define int long long
-const int N = 1e3+5;
-int a[N][N];
 
 signed main(){
     nono_is_handsome
 
     int n;
     cin>>n;
+
+    int** a = new int*[n];
+    for(int i=0;i<n;i++)    a[i] = new int[n];
+    for(int i=0;i<n;i++)    for(int j=0;j<n;j++)    a[i][j] = 0;
     for(int i=0;i<n;i++){
         int d;
         cin>>d;
