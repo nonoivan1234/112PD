@@ -71,13 +71,13 @@ void solve(){
         }
 
         // find max value
-        // int Max = 0, ind = -1;
-        // for(int i = 0; i < StationNum; i++){
-        //     if(v[i] > Max){
-        //         Max = v[i];
-        //         ind = i;
-        //     }
-        // }
+        int Max = 0, ind = -1;
+        for(int i = 0; i < StationNum; i++){
+            if(v[i] > Max){
+                Max = v[i];
+                ind = i;
+            }
+        }
 
         for(int i = 0; i < StationNum; i++){
             x.push_back(v[i] * B[i] / Sum);
@@ -97,15 +97,20 @@ void solve(){
     for(int i = TypeNum - 1; i >= 0; i--){
         for(int j = StationNum - 1; j >= 0; j--){
             if(ans[i][j] != 0)  continue;
-            int tmp = rng() % (A[i] + 1);
-            int tmp1 = rng() % (B[j] + 1);
-            ans[i][j] = min(tmp, tmp1);
+            int choose = rng() % (min(A[i], B[j]) + 1);
+            ans[i][j] += choose;
 
-            A[i] -= ans[i][j];
-            B[j] -= ans[i][j];
+            A[i] -= choose;
+            B[j] -= choose;
         }
     }
 
+    for(int i = 0; i < StationNum; i++){
+        int tmp = min(A[0], B[i]);
+        ans[0][i] += tmp;
+        A[0] -= tmp;
+        B[i] -= tmp;
+    }
     for(int i = 0; i < TypeNum; i++){
         int tmp = min(A[i], B[0]);
         ans[i][0] += tmp;
