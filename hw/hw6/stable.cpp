@@ -42,7 +42,7 @@ void init(){
     }
 }
 
-double val(double now, int i, int j){
+double val(double now, int i, int j){   // getVal in optimized way
     double ret = now, tmp = U[i][j] + Q[0];
     for(int k = 0; k < 4; k++){
         for(auto l : S[j][k]){
@@ -59,7 +59,7 @@ double val(double now, int i, int j){
     return ret;
 }
 
-double getVal(){
+double getVal(){    // getVal in stupid way i.e. for debug
     double ret = 0;
 
     for(int i = 0; i < n; i++){
