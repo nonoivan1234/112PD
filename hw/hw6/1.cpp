@@ -1,176 +1,136 @@
-#include<iostream>
-#include<vector>
-#include<random>
-#include<chrono>
+#include<bits/stdc++.h>
+#pragma comment(linker, "/stack:200000000")
+#pragma GCC optimize("Ofast")
+#pragma GCC optimize ("unroll-loops")
+#pragma GCC target("sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,tune=native")
 using namespace std;
-const int N = 500;
-const int M = 1000;
-int TypeNum, StationNum;
-vector<int> A(N), B(M);
-vector<double> R(N);
+#define nono_is_handsome cin.tie(0); ios_base::sync_with_stdio(0);
+const int N = 25;
+const int M = 505;
+int n, m, R[N], A[N], B[M], D[M][M], ans[N][M], SumOfStation[M];
+double SumOfVal[M];
+vector<int> S[M][4];
+double Q[4], U[N][M];
+int valBest = 0;
+int ansBest[N][M];
 
-mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+void init(){
+    cin >> n >> m;
+    for(int i = 0; i < 4; i++)  cin >> Q[i];
 
-void solve(){
-    double DecreseRate[4];
-    cin >> TypeNum >> StationNum;
-    for(int i = 0; i < 4; i++)    cin >> DecreseRate[i];
+    for(int i = 0; i < n; i++)  cin >> R[i];
+    for(int i = 0; i < n; i++)  cin >> A[i];
+    for(int i = 0; i < m; i++)  cin >> B[i];
 
-    double tmp;
-    for(int i = 0; i < TypeNum; i++)    cin >> tmp, R[i] = tmp * 24;
-    for(int i = 0; i < TypeNum; i++)    cin >> A[i];
-    for(int i = 0; i < StationNum; i++) cin >> B[i];
-
-
-    double U[N][M];
-    for(int i = 0; i < TypeNum; i++){
-        for(int j = 0; j < StationNum; j++){
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < m; j++)
             cin >> U[i][j];
-        }
-    }
-        
+    
+    for(int i = 0; i < m; i++){
+        for(int j = 0; j < m; j++){
+            int tmp;
+            cin >> tmp;
+            if(tmp == 0)    D[i][j] = 0;
+            else if(tmp <= 300) D[i][j] = 1;
+            else if(tmp <= 500) D[i][j] = 2;
+            else if(tmp <= 1000)    D[i][j] = 3;
 
-    int D[M][M];
-    for(int i = 0; i < StationNum; i++){
-        for(int j = 0; j < StationNum; j++){
-            int dis;
-            cin >> dis;
-            if(dis > 500)   D[i][j] = D[j][i] = 3;
-            else if(dis > 300)  D[i][j] = D[j][i] = 2;
-            else if(dis > 1)  D[i][j] = D[j][i] = 1;
-            else    D[i][j] = D[j][i] = 0;
-        }
-    }
-
-    // if(TypeNum > 15 || StationNum > 30) throw(1);
-
-    vector<vector<vector<int>>> S(StationNum, vector<vector<int>>(4));
-    for(int i = 0; i < StationNum; i++){
-        for(int j = 0; j < StationNum; j++){
             S[i][D[i][j]].push_back(j);
         }
     }
+}
 
-    vector<vector<int>> ans(N, vector<int>(M));
-    vector<int> v;
-    vector<int> x(M, 0);
+double val(double now, int i, int j){   // getVal in optimized way
+    double ret = now, tmp = U[i][j] + Q[0];
+    for(int k = 0; k < 4; k++){
+        for(auto l : S[j][k]){
+            tmp -= Q[k] * SumOfStation[l];
+        }
+    }
+    ret += tmp * R[i] * 24;
+    for(int k = 0; k < 4; k++){
+        for(auto l : S[j][k]){
+            ret -= Q[k] * 24 * SumOfVal[l];
+        }
+    }
 
-    for(int k = 0; k < TypeNum; k++){
-        int Sum = 0;
-        v.clear();
-        x.clear();
+    return ret;
+}
 
-        for(int i = 0; i < StationNum; i++){
-            int tmp = 0;
-            for(int j = k; j < TypeNum; j++){
-                tmp += U[j][i] * R[j];
+double getVal(){    // getVal in stupid way i.e. for debug
+    double ret = 0;
+
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            double tmp = U[i][j] + Q[0];
+            for(int k = 0; k < 4; k++){
+                for(auto l : S[j][k]){
+                    for(int t = 0; t < n; t++){
+                        tmp -= Q[k] * ansBest[t][l];
+                    }
+                }
             }
 
-            v.push_back(tmp);
-            Sum += tmp;
+            ret += tmp * R[i] * ansBest[i][j] * 24;
         }
+    }
 
-        // find max value
-        int Max = 0, ind = -1;
-        for(int i = 0; i < StationNum; i++){
-            if(v[i] > Max){
-                Max = v[i];
-                ind = i;
+    return ret;
+}
+
+void solve1(){
+    double now = 0;
+    while(1){
+        double tmp;
+        int x = -1, y = -1;
+        double tp = now;
+        for(int i = 0; i < n; i++){
+            if(A[i] == 0)   continue;
+            for(int j = 0; j < m; j++){
+                if(B[j] == 0)   continue;
+                SumOfStation[j]++;
+                tmp = val(tp, i, j);
+                if(tmp >= now){
+                    now = tmp;
+                    x = i, y = j;
+                }
+                SumOfStation[j]--;
             }
         }
 
-        for(int i = 0; i < StationNum; i++){
-            x.push_back(v[i] * B[i] / Sum);
-        }
-
-        // ans[k][ind] = min(A[k], B[ind]);
-        // A[k] -= ans[k][ind];
-        // B[ind] -= ans[k][ind];
-        for(int i = 0; i < StationNum; i++){
-            ans[k][i] = min(x[i], A[k]);
-            A[k] -= ans[k][i];
-            B[i] -= ans[k][i];
-        }
-    }
-
-    // randomly distribute the rest
-    for(int i = TypeNum - 1; i >= 0; i--){
-        for(int j = StationNum - 1; j >= 0; j--){
-            if(ans[i][j] != 0)  continue;
-            int choose = rng() % (min(A[i], B[j]) + 1);
-            ans[i][j] += choose;
-
-            A[i] -= choose;
-            B[j] -= choose;
+        if(x == -1) break;
+    
+        ans[x][y]++;
+        A[x]--;
+        B[y]--;
+        SumOfStation[y]++;
+        SumOfVal[y] += R[x];
+        
+        if(now >= valBest){
+            valBest = now;
+            for(int i = 0; i < n; i++)
+                for(int j = 0; j < m; j++)
+                    ansBest[i][j] = ans[i][j];
         }
     }
+    // cout << now << "\n";
+}
 
-    for(int i = 0; i < StationNum; i++){
-        int tmp = min(A[0], B[i]);
-        ans[0][i] += tmp;
-        A[0] -= tmp;
-        B[i] -= tmp;
-    }
-    for(int i = 0; i < TypeNum; i++){
-        int tmp = min(A[i], B[0]);
-        ans[i][0] += tmp;
-        A[i] -= tmp;
-        B[0] -= tmp;
-    }
 
-    // ans = {{5, 3, 1}, {1, 3, 1}};
-    // int val = 0;
-    // for(int i = 0; i < TypeNum; i++){
-    //     for(int j = 0; j < StationNum; j++){
-    //         if(ans[i][j] == 0)  continue;
-    //         double tmp = U[i][j] + DecreseRate[0];
-    //         for(int k = 0; k < 4; k++){
-    //             for(int l = 0; l < S[j][k].size(); l++){
-    //                 if(S[j][k][l] == j) continue;
-    //                 tmp -= ans[i][S[j][k][l]] * DecreseRate[k];
-    //             }
-    //         }
-    //         val += tmp * ans[i][j] * R[i];
-    //     }
-    // }
-    // cout << val << "\n";
-    // if(val < 0) throw(1);
+int main(){
+    nono_is_handsome
+    
+    init();
 
-    for(int i = 0; i < TypeNum; i++){
-        for(int j = 0; j < StationNum; j++){
-            cout << ans[i][j];
-            if(j != StationNum - 1) cout << ",";
+    solve1();
+
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            cout << ansBest[i][j];
+            if(j != m - 1)  cout << ",";
         }
         cout << "\n";
     }
-}
 
-int main(){
-    
-    try{
-        solve();
-    }catch(int e){
-        for(int i = 0; i < TypeNum; i++){
-            for(int j = 0; j < StationNum; j++){
-                int tmp = rng() % (A[i] + 1);
-                int tmp1 = rng() % (B[j] + 1);
-                cout << min(tmp, tmp1);
-
-                A[i] -= tmp;
-                B[j] -= tmp;
-                if(j != StationNum - 1) cout << ",";
-            }
-            cout << "\n";
-        }
-        // for(int i = 0; i < TypeNum; i++){
-        //     for(int j = 0; j < StationNum; j++){
-        //         cout << 0;
-        //         if(j != StationNum - 1) cout << ",";
-        //     }
-        //     cout << "\n";
-        // }
-    }
-    
-
-    return 0;
+    // cout << getVal() << "\n";
 }
