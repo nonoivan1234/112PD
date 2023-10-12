@@ -7,7 +7,6 @@ int n, m, R[N], A[N], B[M], D[M][M], ans[N][M], SumOfStation[M];
 double SumOfVal[M];
 vector<int> S[M][4];
 double Q[4], U[N][M];
-vector<pair<int, int>> v;
 
 void init(){
     cin >> n >> m;
