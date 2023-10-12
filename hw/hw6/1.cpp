@@ -13,6 +13,9 @@ vector<int> S[M][4];
 double Q[4], U[N][M];
 int valBest = 0;
 int ansBest[N][M];
+stack<pair<int, int>> v;
+
+void print();
 
 void init(){
     cin >> n >> m;
@@ -53,7 +56,7 @@ double val(double now, int i, int j){   // getVal in optimized way
             ret -= Q[k] * 24 * SumOfVal[l];
         }
     }
-
+    printf("ret = %d\n", ret);
     return ret;
 }
 
@@ -78,42 +81,60 @@ double getVal(){    // getVal in stupid way i.e. for debug
     return ret;
 }
 
-void solve1(){
-    double now = 0;
-    while(1){
-        double tmp;
-        int x = -1, y = -1;
-        double tp = now;
-        for(int i = 0; i < n; i++){
-            if(A[i] == 0)   continue;
-            for(int j = 0; j < m; j++){
-                if(B[j] == 0)   continue;
-                SumOfStation[j]++;
-                tmp = val(tp, i, j);
-                if(tmp >= now){
-                    now = tmp;
-                    x = i, y = j;
-                }
-                SumOfStation[j]--;
-            }
-        }
+void solve1(double now, int i, int j){
+    ans[i][j]++;
+    A[i]--;
+    B[j]--;
+    // SumOfStation[j]++;
+    // SumOfVal[j] += R[i];
 
-        if(x == -1) break;
-    
-        ans[x][y]++;
-        A[x]--;
-        B[y]--;
-        SumOfStation[y]++;
-        SumOfVal[y] += R[x];
-        
-        if(now >= valBest){
-            valBest = now;
-            for(int i = 0; i < n; i++)
-                for(int j = 0; j < m; j++)
-                    ansBest[i][j] = ans[i][j];
+    double tmp = 0;
+    int x = -1, y = -1;
+    double tp = now;
+    for(int i = 0; i < n; i++){
+        if(A[i] == 0)   continue;
+        for(int j = 0; j < m; j++){
+            if(B[j] == 0)   continue;
+            // SumOfStation[j]++;
+            // SumOfVal[j] += R[i];
+            tmp = val(tp, i, j);
+            if(tmp >= now){
+                // solve1(tp, i, j);
+                now = tmp;
+                x = i, y = j;
+            }
+            // SumOfStation[j]--;
+            // SumOfVal[j] -= R[i];
         }
     }
-    // cout << now << "\n";
+
+    // if(x == -1) break;
+
+    if(now > valBest){
+        valBest = now;
+        for(int i = 0; i < n; i++)
+            for(int j = 0; j < m; j++)
+                ansBest[i][j] = ans[i][j];
+    }
+    ans[i][j]--;
+    A[i]++;
+    B[j]++;
+    // SumOfStation[j]--;
+    // SumOfVal[j] -= R[i];
+    
+    // printf("now = %d\n", tmp);
+    print();
+}
+
+void print(){
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            cout << ans[i][j];
+            if(j != m - 1)  cout << ",";
+        }
+        cout << "\n";
+    }
+    cout << "\n";
 }
 
 
@@ -122,8 +143,15 @@ int main(){
     
     init();
 
-    solve1();
+    // for(int i = 0; i < n; i++){
+    //     for(int j = 0; j < m; j++){
+    //         solve1(0, i, j);
+    //     }
+    // }
 
+    SumOfStation[0] = 1;
+    SumOfVal[0] = R[0];
+    solve1(0, 0, 0);
     for(int i = 0; i < n; i++){
         for(int j = 0; j < m; j++){
             cout << ansBest[i][j];

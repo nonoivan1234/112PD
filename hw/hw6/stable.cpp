@@ -1,8 +1,4 @@
 #include<bits/stdc++.h>
-#pragma comment(linker, "/stack:200000000")
-#pragma GCC optimize("Ofast")
-#pragma GCC optimize ("unroll-loops")
-#pragma GCC target("sse,sse2,sse3,ssse3,sse4,popcnt,abm,mmx,avx,tune=native")
 using namespace std;
 #define nono_is_handsome cin.tie(0); ios_base::sync_with_stdio(0);
 const int N = 25;
@@ -11,9 +7,6 @@ int n, m, R[N], A[N], B[M], D[M][M], ans[N][M], SumOfStation[M];
 double SumOfVal[M];
 vector<int> S[M][4];
 double Q[4], U[N][M];
-const double TRY = 500;
-int valBest = 0;
-int ansBest[N][M];
 vector<pair<int, int>> v;
 
 void init(){
@@ -68,12 +61,12 @@ double getVal(){    // getVal in stupid way i.e. for debug
             for(int k = 0; k < 4; k++){
                 for(auto l : S[j][k]){
                     for(int t = 0; t < n; t++){
-                        tmp -= Q[k] * ansBest[t][l];
+                        tmp -= Q[k] * ans[t][l];
                     }
                 }
             }
 
-            ret += tmp * R[i] * ansBest[i][j] * 24;
+            ret += tmp * 24 * R[i] * ans[i][j];
         }
     }
 
@@ -100,20 +93,13 @@ void solve1(){
             }
         }
 
-        if(x == -1) break;
+        if(x == -1) break;  // if no station can provide more value
     
         ans[x][y]++;
         A[x]--;
         B[y]--;
         SumOfStation[y]++;
         SumOfVal[y] += R[x];
-        
-        if(now > valBest){
-            valBest = now;
-            for(int i = 0; i < n; i++)
-                for(int j = 0; j < m; j++)
-                    ansBest[i][j] = ans[i][j];
-        }
     }
     
     // cout << now << "\n";
@@ -129,7 +115,7 @@ int main(){
 
     for(int i = 0; i < n; i++){
         for(int j = 0; j < m; j++){
-            cout << ansBest[i][j];
+            cout << ans[i][j];
             if(j != m - 1)  cout << ",";
         }
         cout << "\n";
