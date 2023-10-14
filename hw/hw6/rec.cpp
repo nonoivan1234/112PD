@@ -9,10 +9,7 @@ vector<int> S[M][5];    // S[i][k] = {j | D[i][j] = k}
 double Q[4], U[N][M];
 double MAX = 0;
 int ansBest[N][M];
-const double DIFF = 420;
-clock_t start = clock();
-bool flag = 0;
-int CopyA[N], CopyB[M];
+const double DIFF = 200;
 
 void solve1(double now, int i, int j);
 void solve2();
@@ -22,8 +19,8 @@ void init(){
     for(int i = 0; i < 4; i++)  cin >> Q[i];
 
     for(int i = 0; i < n; i++)  cin >> R[i];
-    for(int i = 0; i < n; i++)  cin >> CopyA[i], A[i] = CopyA[i];
-    for(int i = 0; i < m; i++)  cin >> CopyB[i], B[i] = CopyB[i];
+    for(int i = 0; i < n; i++)  cin >> A[i];
+    for(int i = 0; i < m; i++)  cin >> B[i];
 
     for(int i = 0; i < n; i++)
         for(int j = 0; j < m; j++)
@@ -43,17 +40,7 @@ void init(){
         }
     }
 
-    if(m <= 30)  solve1(0, -1, -1);
-    else    solve2();
-    if(flag){
-        memset(ans, 0, sizeof(ans));
-        memset(SumOfStation, 0, sizeof(SumOfStation));
-        memset(SumOfVal, 0, sizeof(SumOfVal));
-        for(int i = 0; i < n; i++)  A[i] = CopyA[i];
-        for(int i = 0; i < m; i++)  B[i] = CopyB[i];
-
-        solve2();
-    }
+    solve1(0, -1, -1);
 }
 
 double val(double now, int i, int j){   // getVal in optimized way
@@ -74,11 +61,14 @@ double val(double now, int i, int j){   // getVal in optimized way
 }
 
 void solve1(double now, int i, int j){
-    clock_t end = clock();
-    if((double)(end - start) / CLOCKS_PER_SEC > 4.98){
-        flag = 1;
-        return;
-    }
+    // for(int i = 0; i < n; i++){
+    //     for(int j = 0; j < m; j++){
+    //         cout << ans[i][j] << " ";
+    //     }
+    //     cout << "\n";
+    // }
+    // cout << "\n";
+
     double mx = now;
     int x = -1, y = -1;
     for(int k = 0; k < n; k++){
@@ -94,9 +84,6 @@ void solve1(double now, int i, int j){
             SumOfStation[l]--;
         }
     }
-
-    if(x == -1) return;
-
     if(mx > MAX){
         MAX = mx;
         ans[x][y]++;
@@ -107,6 +94,8 @@ void solve1(double now, int i, int j){
         }
         ans[x][y]--;
     }
+
+    if(x == -1) return;
 
     for(int k = 0; k < n; k++){
         if(A[k] == 0)   continue;
@@ -130,37 +119,7 @@ void solve1(double now, int i, int j){
     }
 }
 
-void solve2(){
-    double mx = 0;
-    while(1){
-        double tmp;
-        int x = -1, y = -1;
-        double now = mx;
-        for(int i = 0; i < n; i++){
-            if(A[i] == 0)   continue;
-            for(int j = 0; j < m; j++){
-                if(B[j] == 0)   continue;
-                SumOfStation[j]++;
-                tmp = val(now, i, j);
-                if(tmp > mx){
-                    mx = tmp;
-                    x = i, y = j;
-                }
-                SumOfStation[j]--;
-            }
-        }
-
-        if(x == -1) break;  // if no station can provide more value
-    
-        ans[x][y]++;
-        A[x]--;
-        B[y]--;
-        SumOfStation[y]++;
-        SumOfVal[y] += R[x];
-    }
-}
-
-double getVal(int arr[][M]){    // getVal in stupid way i.e. for debug
+double getVal(int ansBest[][M]){    // getVal in stupid way i.e. for debug
     double ret = 0;
 
     for(int i = 0; i < n; i++){
@@ -169,12 +128,12 @@ double getVal(int arr[][M]){    // getVal in stupid way i.e. for debug
             for(int k = 0; k < 4; k++){
                 for(auto l : S[j][k]){
                     for(int t = 0; t < n; t++){
-                        tmp -= Q[k] * arr[t][l];
+                        tmp -= Q[k] * ansBest[t][l];
                     }
                 }
             }
 
-            ret += tmp * 24.0 * R[i] * arr[i][j];
+            ret += tmp * 24.0 * R[i] * ansBest[i][j];
         }
     }
 
@@ -184,10 +143,10 @@ double getVal(int arr[][M]){    // getVal in stupid way i.e. for debug
 
 int main(){
     nono_is_handsome
-
+    
     init();
 
-    if(getVal(ansBest) < getVal(ans))   memcpy(ansBest, ans, sizeof(ans));
+    solve1(0, -1, -1);
 
     for(int i = 0; i < n; i++){
         for(int j = 0; j < m; j++){
@@ -197,5 +156,6 @@ int main(){
         cout << "\n";
     }
 
-    // cout << getVal(ansBest) << "\n";
+    // cout << MAX << "\n";
+    cout << getVal(ansBest) << "\n";
 }

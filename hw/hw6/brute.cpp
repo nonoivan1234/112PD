@@ -3,7 +3,7 @@ using namespace std;
 #define nono_is_handsome cin.tie(0); ios_base::sync_with_stdio(0);
 const int N = 25;
 const int M = 505;
-int n, m, R[N], A[N], B[M], D[M][M], ans[N][M], SumOfStation[M];
+int n, m, D[M][M], ans[N][M], R[N], A[N], B[M], SumOfStation[M];
 double SumOfVal[M]; // SumOfVal[j] = sum_{i} R[i] * ans[i][j]
 vector<int> S[M][5];    // S[i][k] = {j | D[i][j] = k}
 double Q[4], U[N][M];
@@ -35,17 +35,21 @@ void init(){
     }
 }
 
-double val(double now, int i, int j){   // getVal in optimized way
-    double ret = now, tmp = U[i][j] + Q[0];
-    for(int k = 0; k < 4; k++){
-        for(auto l : S[j][k]){
-            tmp -= Q[k] * SumOfStation[l];
-        }
-    }
-    ret += tmp * R[i] * 24;
-    for(int k = 0; k < 4; k++){
-        for(auto l : S[j][k]){
-            ret -= Q[k] * 24 * SumOfVal[l];
+double getVal(){    // getVal in stupid way i.e. for debug
+    double ret = 0;
+
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            double tmp = U[i][j] + Q[0];
+            for(int k = 0; k < 4; k++){
+                for(auto l : S[j][k]){
+                    for(int t = 0; t < n; t++){
+                        tmp -= Q[k] * ans[t][l];
+                    }
+                }
+            }
+
+            ret += tmp * 24.0 * R[i] * ans[i][j];
         }
     }
 
@@ -62,13 +66,13 @@ void solve1(){
             if(A[i] == 0)   continue;
             for(int j = 0; j < m; j++){
                 if(B[j] == 0)   continue;
-                SumOfStation[j]++;
-                tmp = val(now, i, j);
+                ans[i][j]++;
+                tmp = getVal();
                 if(tmp > mx){
                     mx = tmp;
                     x = i, y = j;
                 }
-                SumOfStation[j]--;
+                ans[i][j]--;
             }
         }
 
@@ -80,6 +84,8 @@ void solve1(){
         SumOfStation[y]++;
         SumOfVal[y] += R[x];
     }
+    
+    // cout << mx << "\n";
 }
 
 
@@ -97,4 +103,6 @@ int main(){
         }
         cout << "\n";
     }
+
+    // cout << getVal() << "\n";
 }
