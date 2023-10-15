@@ -14,7 +14,7 @@ clock_t start = clock();
 bool flag = 0;
 int CopyA[N], CopyB[M];
 
-void solve1(double now, int i, int j);
+void solve1(double now);
 void solve2();
 
 void init(){
@@ -43,7 +43,7 @@ void init(){
         }
     }
 
-    if(m <= 30)  solve1(0, -1, -1);
+    if(m <= 30)  solve1(0);
     else    solve2();
     if(flag){
         memset(ans, 0, sizeof(ans));
@@ -73,7 +73,7 @@ double val(double now, int i, int j){   // getVal in optimized way
     return ret;
 }
 
-void solve1(double now, int i, int j){
+void solve1(double now){
     clock_t end = clock();
     if((double)(end - start) / CLOCKS_PER_SEC > 4.98){
         flag = 1;
@@ -119,7 +119,7 @@ void solve1(double now, int i, int j){
                 ans[k][l]++;
                 SumOfVal[l] += R[k];
 
-                solve1(tmp, k, l);
+                solve1(tmp);
 
                 A[k]++, B[l]++;
                 ans[k][l]--;
