@@ -23,9 +23,11 @@ signed main(){
 
     int ans = value();
     for(int i = 0; i < n; i++){
-        x[i] += k;
-        ans = max(ans, value());
-        x[i] -= k;
+        for(int j = 0; j <= k; j++){
+            x[i] += j;
+            ans = max(ans, value());
+            x[i] -= j;
+        }
     }
 
     cout << ans << '\n';
