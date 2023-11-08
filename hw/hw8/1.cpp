@@ -9,12 +9,8 @@ private:
 public:
     Item(char* n, int mc);
     ~Item();
-    int getMaterialCost(){
-        return materialCost;
-    }
-    bool isThisItem(char* n){
-        return strcmp(name, n) == 0;
-    }
+    int getMaterialCost();
+    bool isThisItem(char* n);
 };
 
 class Product{
@@ -29,14 +25,19 @@ public:
     Product(char* n, int p, int c, int sq, int ic);
     ~Product();
     bool isInFrontOf(const Product& prod, int criterion);
-    int profit() const;
+    int profit() const; // 1. 
     void addItem(Item* itemPtr);
-    bool isThisProduct(char* n){
-        return strcmp(name, n) == 0;
-    }
-    int getCost() const;
+    bool isThisProduct(char* n);
+    int getCost() const;    // 2.
 };
 
+int Item::getMaterialCost(){
+    return materialCost;
+}
+
+bool Item::isThisItem(char* n){
+    return strcmp(name, n) == 0;
+}
 
 Item::Item(char* n, int mc){
     name = n;
@@ -48,6 +49,9 @@ Item::~Item(){
     name = nullptr;
 }
 
+bool Product::isThisProduct(char* n){
+    return strcmp(name, n) == 0;
+}
 
 Product::Product(char* n, int p, int c, int sq, int ic){
     name = n;
