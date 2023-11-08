@@ -70,10 +70,12 @@ void Product::addItem(Item* itemPtr){
 Product::~Product(){
     delete [] name;
     name = nullptr;
+
     for(int i = 0; i < itemCnt; i++){
-        delete itemList[i];
         itemList[i] = nullptr;
     }
+    delete [] itemList;
+    itemList = nullptr;
 }
 
 bool Product::isInFrontOf(const Product& prod, int criterion){
@@ -147,6 +149,8 @@ int main(){
         int price, cost, salesQty, itemCnt;
         cin  >> price >> cost >> salesQty >> itemCnt;   cin.ignore();
         products[i] = new Product(name, price, cost, salesQty, itemCnt);
+
+        name = nullptr;
     }
 
     for(int i = 0; i < itemTotalCnt; i++){
@@ -156,6 +160,8 @@ int main(){
         int materialCost;
         cin >> materialCost;    cin.ignore();
         items[i] = new Item(name, materialCost);
+
+        name = nullptr;
     }
 
     for(int i = 0; i < relationships; i++){
@@ -176,6 +182,9 @@ int main(){
                 break;
             }
         }
+
+        name = nullptr;
+        itemName = nullptr;
     }
 
     int criterion, num;
@@ -188,4 +197,17 @@ int main(){
     }
 
     cout << ans << '\n';
+
+    for(int i = 0; i < productCnt; i++){
+        products[i]->~Product();
+    }
+    delete [] products;
+    products = nullptr;
+
+    for(int i = 0; i < itemTotalCnt; i++){
+        delete items[i];
+        items[i] = nullptr;
+    }
+    delete [] items;
+    items = nullptr;
 }
