@@ -51,34 +51,23 @@ public:
     Article(string path);
     int CntWord(Dictionary &dict);
     ~Article();
-    char punk[8] = {',', '.', '?', '!', ';', ':', '\"', '\''};
 private:
     ifstream article;
     string path;
     char text[10005];
-    int len;
 };
 
 Article::Article(string path){
     this->path = path;
     article.open(path);
     article.getline(text, 10005);
-    len = strlen(text);
 }
 
 int Article::CntWord(Dictionary &dict){
     int cnt = 0;
 
-    for(int i = 0; i < len; i++){
-        for(int j = 0; j < 8; j++){
-            if(text[i] == punk[j]){ // Replace punctuation with space
-                text[i] = ' ';
-            }
-        }
-    }
-
     char *now;
-    now = strtok(text, " ");
+    now = strtok(text, " ,.?!;:\"\'");
     while(now != nullptr){
         now = ToLower(now);
         for(int i = 0; i < dict.GetSize(); i++){
@@ -87,7 +76,7 @@ int Article::CntWord(Dictionary &dict){
                 break;
             }
         }
-        now = strtok(NULL, " ");
+        now = strtok(NULL, " ,.?!;:\"\'");
     }
 
     return cnt;
@@ -103,8 +92,8 @@ int main(){
     getline(cin, DictionaryPath);
 
     // For Linux Debug
-    ArticlePath.insert(0, ".");
-    DictionaryPath.insert(0, ".");
+    // ArticlePath.insert(0, ".");
+    // DictionaryPath.insert(0, ".");
 
     Dictionary dict(DictionaryPath);
     Article article(ArticlePath);
