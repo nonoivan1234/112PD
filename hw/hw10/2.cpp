@@ -222,16 +222,10 @@ public:
 };
 
 ShowAnimal::ShowAnimal(int id, Date b, string n) : Animal(id, b, n) {
-    this->showDates = new Date*[1];
-    this->showDates[0] = new Date;
-    *(this->showDates[0]) = {0, 0, 0};
     this->showCnt = 0;
 }
 
 ShowAnimal::ShowAnimal(int id, Date b) : Animal(id, b) {
-    this->showDates = new Date*[1];
-    this->showDates[0] = new Date;
-    *(this->showDates[0]) = {0, 0, 0};
     this->showCnt = 0;
 }
 
@@ -252,13 +246,14 @@ ShowAnimal::~ShowAnimal() {
 }
 
 void ShowAnimal::addShowDate(const Date& d) {
+    if(isLess(d, this->birthday)) {
+        return;
+    }
     Date** tmp = new Date*[this->showCnt + 1];
     for (int i = 0; i < this->showCnt; i++) {
         tmp[i] = this->showDates[i];
         if(isEqual(d, *(this->showDates[i]))) {
-            return;
-        }
-        if(isLess(d, this->birthday)) {
+            delete [] tmp;
             return;
         }
     }
@@ -272,12 +267,8 @@ void ShowAnimal::addShowDate(const Date& d) {
 int ShowAnimal::getShowCnt(const Date& start, const Date& end) const {
     int cnt = 0;
     for (int i = 0; i < this->showCnt; i++) {
-        if (start.year <= this->showDates[i]->year && this->showDates[i]->year <= end.year) {
-            if (start.month <= this->showDates[i]->month && this->showDates[i]->month <= end.month) {
-                if (start.day <= this->showDates[i]->day && this->showDates[i]->day <= end.day) {
-                    cnt++;
-                }
-            }
+        if ((isLess(start, *(this->showDates[i])) || isEqual(start, *(this->showDates[i]))) && (isLess(*(this->showDates[i]), end) || isEqual(*(this->showDates[i]), end))) {
+            cnt++;
         }
     }
     return cnt;
@@ -299,11 +290,11 @@ void ShowAnimal::print() const {
 
 
 int main(){
-    Animal* ani[105];
-    DisplayAnimal* dis[105];
-    ShowAnimal* show[105];
+    Animal* ani[205];
+    DisplayAnimal* dis[205];
+    ShowAnimal* show[205];
 
-    for(int i = 0; i < 105; i++){
+    for(int i = 0; i < 205; i++){
         ani[i] = NULL;
         dis[i] = NULL;
         show[i] = NULL;
@@ -330,10 +321,7 @@ int main(){
                 Date birthday = {atoi(Y), atoi(M), atoi(D)};
                 ani[id] = new Animal(id, birthday);
                 if(action == "Show"){
-                    if(show[id] == NULL)
-                        show[id] = new ShowAnimal(id, birthday);
-                    else
-                        show[id]->addShowDate(birthday);
+                    show[id] = new ShowAnimal(id, birthday);
                 }
                 else{
                     dis[id] = new DisplayAnimal(id, birthday);
@@ -343,15 +331,13 @@ int main(){
                 Date birthday = {atoi(Y), atoi(M), atoi(D)};
                 ani[id] = new Animal(id, birthday, name);
                 if(action == "Show"){
-                    if(show[id] == NULL)
-                        show[id] = new ShowAnimal(id, birthday, name);
-                    else
-                        show[id]->addShowDate(birthday);
+                    show[id] = new ShowAnimal(id, birthday, name);
                 }
                 else{
                     dis[id] = new DisplayAnimal(id, birthday, name);
                 }
             }
+
         }
         else if(type == 'S'){
             string name;
@@ -368,13 +354,11 @@ int main(){
             Time end = {atoi(H), atoi(M), atoi(S)};
 
 
-            for(int j = 0; j < 105; j++){
-                if(ani[j] != NULL && ani[j]->getName() == name){
-                    if(dis[j] == NULL)
-                        dis[j] = new DisplayAnimal(*ani[j]);
+            for(int j = 0; j < 205; j++){
+                if(ani[j] != NULL && ani[j]->getName() == name && show[j] == NULL && dis[j] != NULL){
 
                     if(!validTime(start) || !validTime(end) || !cmpTime(start, end)){
-                        continue;
+                        break;
                     }
                     dis[j]->setDisplayTime(start, end);
                     break;
@@ -384,7 +368,7 @@ int main(){
         else if(type == 'N'){
             int id;
             string name;
-            cin >> id >> name;
+            cin >> id >> name;  cin.ignore();
 
             if(ani[id] != NULL)
                 ani[id]->setName(name);
@@ -395,7 +379,7 @@ int main(){
         }
         else if(type == 'A'){
             string name;
-            cin >> name;
+            cin >> name;    cin.ignore();
             // input date in format of YYYY/MM/DD
             char Y[55], M[33], D[33];
             cin.getline(Y, 55, '/');
@@ -404,8 +388,8 @@ int main(){
 
             Date d = {atoi(Y), atoi(M), atoi(D)};
 
-            for(int j = 0; j < 105; j++){
-                if(ani[j] != NULL && ani[j]->getName() == name){
+            for(int j = 0; j < 205; j++){
+                if(ani[j] != NULL && ani[j]->getName() == name && dis[j] == NULL && show[j] != NULL){
                     show[j]->addShowDate(d);
                     break;
                 }
@@ -417,9 +401,8 @@ int main(){
     cin >> type;
 
     int cnt1 = 0, cnt2 = 0;
-    for(int i = 0; i < 105; i++){
+    for(int i = 0; i < 205; i++){
         if(dis[i] != NULL){
-            dis[i]->print();
             cnt1++;
         }
         if(show[i] != NULL){
@@ -445,7 +428,7 @@ int main(){
 
         Date end = {atoi(Y), atoi(M), atoi(D)};
 
-        for(int i = 0; i < 105; i++){
+        for(int i = 0; i < 205; i++){
             if(show[i] != NULL && show[i]->getName() == name){
                 show[i]->print(start, end);
                 break;
