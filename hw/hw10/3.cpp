@@ -20,9 +20,10 @@ Time readTime(){
 
     Time t;
     char H[3], M[3], S[3];
+    cin.ignore();
     cin.getline(H, 3, ':');
     cin.getline(M, 3, ':');
-    cin >> S;   cin.ignore();
+    cin >> S;
 
     t = {atoi(H), atoi(M), atoi(S)};
     return t;
@@ -33,9 +34,10 @@ Date readDate(){
 
     Date d;
     char Y[5], M[3], D[3];
+    cin.ignore();
     cin.getline(Y, 5, '/');
     cin.getline(M, 3, '/');
-    cin >> D;   cin.ignore();
+    cin >> D;
 
     d = {atoi(Y), atoi(M), atoi(D)};
     return d;
@@ -142,6 +144,7 @@ public:
     int getAge() const;
     void setName(string n);
     void print() const;
+    string getName() const {return this->name;};
     int getID() const {return this->id;};
     bool isShow() const {return this->isShowAnimal;};
     bool isThisID(int id) const {return this->id == id;};
@@ -206,7 +209,7 @@ public:
     bool isValid() const;
 };
 
-// Always initialize the start.hour to -1 for determine whether the time is valid
+// Always initialize the start.hour to -1 to determine whether the time is valid
 DisplayAnimal::DisplayAnimal(int id, Date b, string n) : Animal(id, b, n, false) {
     this->start = {-1, 0, 0};
     this->end = {0, 0, 0};
@@ -259,7 +262,6 @@ void DisplayAnimal::print() const {
 class ShowAnimal : public Animal {
 private:
     Date** showDates;
-    int showDatesSize;
     int showCnt;
 public:
     ShowAnimal(int id, Date b, string n);
@@ -274,30 +276,23 @@ public:
 };
 
 ShowAnimal::ShowAnimal(int id, Date b, string n) : Animal(id, b, n, true) {
-    this->showDates = new Date*[2];
-    this->showDatesSize = 2;
-    for(int i = 0; i < showDatesSize; i++)  this->showDates[i] = nullptr;
+    this->showDates = nullptr;
     this->showCnt = 0;
 }
 
 ShowAnimal::ShowAnimal(int id, Date b) : Animal(id, b, "", true) {
-    this->showDates = new Date*[2];
-    this->showDatesSize = 2;
-    for(int i = 0; i < showDatesSize; i++)  this->showDates[i] = nullptr;
+    this->showDates = nullptr;
     this->showCnt = 0;
 }
 
 ShowAnimal::ShowAnimal(const ShowAnimal& sa) : Animal(sa) {
     // Copy constructor for ShowAnimal
-
-    this->showDatesSize = sa.showDatesSize;
     this->showCnt = sa.showCnt;
-    this->showDates = new Date*[this->showDatesSize];
+    this->showDates = new Date*[(sa.showCnt/100 + 1)*100];
     for (int i = 0; i < this->showCnt; i++) {
         this->showDates[i] = new Date;
         *(this->showDates[i]) = *(sa.showDates[i]);
     }
-    for(int i = this->showCnt; i < showDatesSize; i++)  this->showDates[i] = nullptr;
 }
 
 ShowAnimal::~ShowAnimal() {
@@ -313,40 +308,31 @@ void ShowAnimal::addShowDate(const Date& d) {
     // If the date is earlier than the birthday, do nothing
     if(DateisEarlier(d, this->birthday))  return;
 
-    bool canAdd = this->showCnt == this->showDatesSize;
-    if(canAdd){
-        // cout << this->showCnt << endl;
-        for(int i = 0; i < showDatesSize; i++){
-            if(DateisEqual(d, *(this->showDates[i])))   break;
-            if(this->showDates[i] == nullptr){
-                this->showDates[i] = new Date;
-                *(this->showDates[i]) = d;
-                this->showCnt++;
-                break;
-            }
-        }
-        return;
+    for(int i = 0; i < this->showCnt; i++){
+        // If the date is already in the array, do nothing
+        if(DateisEqual(d, *(this->showDates[i])))    return;
     }
 
-    // Resize the array to 2 times the original one
-    Date** tmp = new Date*[2*(this->showDatesSize)];
-    for(int i = 0; i < showDatesSize; i++)  tmp[i] = this->showDates[i];
-    for(int i = showDatesSize; i < 2*showDatesSize; i++)    tmp[i] = nullptr;
-    this->showDatesSize*=2;
-    for(int i = 0; i < showDatesSize; i++){
-        if(DateisEqual(d, *(this->showDates[i])))   break;
-        if(this->showDates[i] == nullptr){
-            this->showDates[i] = new Date;
-            *(this->showDates[i]) = d;
-            this->showCnt++;
-            break;
-        }
+    if(this->showCnt % 500 != 0){
+        // If the array is not full, add the date to the array
+        this->showDates[this->showCnt] = new Date;
+        *(this->showDates[this->showCnt]) = d;
+        this->showCnt++;
     }
-    // this->showDates[this->showCnt] = new Date;
-    // *(this->showDates[this->showCnt]) = d;
-    // this->showCnt++;
-    delete [] this->showDates;
-    this->showDates = tmp;
+    else{
+        // If the array is full, expand the array and add the date to the array
+        Date** tmp = new Date*[(this->showCnt/500 + 1)*500];
+        for(int i = 0; i < this->showCnt; i++){
+            tmp[i] = this->showDates[i];
+        }
+        tmp[this->showCnt] = new Date;
+        *(tmp[this->showCnt]) = d;
+
+        this->showCnt++;
+        
+        delete [] this->showDates;
+        this->showDates = tmp;
+    }
 }
 
 int ShowAnimal::getShowCnt(const Date& start, const Date& end) const {
@@ -408,7 +394,7 @@ Zoo::~Zoo() {
 bool Zoo::isFull() const {
     // If the zoo is full, return true
 
-    if (this->displayAnimalCnt + this->showAnimalCnt >= ZOO_CAP) {
+    if (this->displayAnimalCnt + this->showAnimalCnt == ZOO_CAP) {
         return true;
     }
     return false;
@@ -496,7 +482,7 @@ void Zoo::print() const {
 
 Animal* Zoo::findMostBusyShowAnimal() {
     int max = -1;
-    int maxID = 1000000;
+    int maxID = ZOO_CAP;
     int maxIndex = -1;
     for (int i = 0; i < ZOO_CAP; i++) {
         if (this->animals[i] == nullptr)    break;
@@ -525,16 +511,16 @@ int main(){
     Zoo zoo;
 
     int testNum;
-    cin >> testNum; cin.ignore();
+    cin >> testNum;
 
     for(int t = 0; t < testNum; t++){
         char type;
-        cin >> type;    cin.ignore();
+        cin >> type;  
 
         if(type == 'C'){    // Create animal
             int id;
             string name, action;
-            cin >> action >> id >> name;  cin.ignore();
+            cin >> action >> id >> name;
 
             Date birthday = readDate();
 
@@ -557,7 +543,7 @@ int main(){
         }
         else if(type == 'S'){   // Set display time
             string name;
-            cin >> name;    cin.ignore();
+            cin >> name;  
             Time start = readTime();
             Time end = readTime();
 
@@ -566,13 +552,13 @@ int main(){
         else if(type == 'N'){   // Change animal name
             int id;
             string name;
-            cin >> id >> name;  cin.ignore();
+            cin >> id >> name;
 
             zoo.ChangeAnimalName(id, name);
         }
         else if(type == 'A'){   // Add show date
             string name;
-            cin >> name;    cin.ignore();
+            cin >> name;  
             Date d = readDate();
 
             zoo.AddShowDate(name, d);
