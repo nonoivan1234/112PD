@@ -255,11 +255,10 @@ void DisplayAnimal::print() const {
         cout << endl;
     }
 }
-
+const int N = 2e4;
 class ShowAnimal : public Animal {
 private:
-    Date** showDates;
-    int showDatesSize;
+    Date showDates[N];
     int showCnt;
 public:
     ShowAnimal(int id, Date b, string n);
@@ -274,79 +273,49 @@ public:
 };
 
 ShowAnimal::ShowAnimal(int id, Date b, string n) : Animal(id, b, n, true) {
-    this->showDates = new Date*[2];
-    this->showDatesSize = 2;
-    for(int i = 0; i < showDatesSize; i++)  this->showDates[i] = nullptr;
+    // this->showDates = nullptr;
+    // for(int i = 0; i < N; i++)  this->showDates[i] = nullptr;
     this->showCnt = 0;
 }
 
 ShowAnimal::ShowAnimal(int id, Date b) : Animal(id, b, "", true) {
-    this->showDates = new Date*[2];
-    this->showDatesSize = 2;
-    for(int i = 0; i < showDatesSize; i++)  this->showDates[i] = nullptr;
+    // this->showDates = nullptr;
+    // for(int i = 0; i < N; i++)  this->showDates[i] = nullptr;
     this->showCnt = 0;
 }
 
 ShowAnimal::ShowAnimal(const ShowAnimal& sa) : Animal(sa) {
     // Copy constructor for ShowAnimal
 
-    this->showDatesSize = sa.showDatesSize;
     this->showCnt = sa.showCnt;
-    this->showDates = new Date*[this->showDatesSize];
-    for (int i = 0; i < this->showCnt; i++) {
-        this->showDates[i] = new Date;
-        *(this->showDates[i]) = *(sa.showDates[i]);
+    for(int i = 0; i < sa.showCnt; i++){
+        this->showDates[i] = sa.showDates[i];
     }
-    for(int i = this->showCnt; i < showDatesSize; i++)  this->showDates[i] = nullptr;
 }
 
 ShowAnimal::~ShowAnimal() {
-    for (int i = 0; i < this->showCnt; i++) {
-        delete this->showDates[i];
-        showDates[i] = nullptr;
-    }
-    delete [] this->showDates;
-    this->showDates = nullptr;
+    // for (int i = 0; i < this->showCnt; i++) {
+    //     delete this->showDates[i];
+    //     showDates[i] = nullptr;
+    // }
 }
 
 void ShowAnimal::addShowDate(const Date& d) {
     // If the date is earlier than the birthday, do nothing
     if(DateisEarlier(d, this->birthday))  return;
 
-    bool canAdd = this->showCnt == this->showDatesSize;
-    if(canAdd){
-        // cout << this->showCnt << endl;
-        for(int i = 0; i < showDatesSize; i++){
-            if(DateisEqual(d, *(this->showDates[i])))   break;
-            if(this->showDates[i] == nullptr){
-                this->showDates[i] = new Date;
-                *(this->showDates[i]) = d;
-                this->showCnt++;
-                break;
-            }
+    // cout << "123\n";
+    for (int i = 0; i < this->showCnt; i++) {
+        if(DateisEqual(d, (this->showDates[i]))) {
+            // If the date is already in the array, do nothing
+            return;
         }
-        return;
     }
 
-    // Resize the array to 2 times the original one
-    Date** tmp = new Date*[2*(this->showDatesSize)];
-    for(int i = 0; i < showDatesSize; i++)  tmp[i] = this->showDates[i];
-    for(int i = showDatesSize; i < 2*showDatesSize; i++)    tmp[i] = nullptr;
-    this->showDatesSize*=2;
-    for(int i = 0; i < showDatesSize; i++){
-        if(DateisEqual(d, *(this->showDates[i])))   break;
-        if(this->showDates[i] == nullptr){
-            this->showDates[i] = new Date;
-            *(this->showDates[i]) = d;
-            this->showCnt++;
-            break;
-        }
-    }
+    // cout << this->showCnt << endl;
     // this->showDates[this->showCnt] = new Date;
-    // *(this->showDates[this->showCnt]) = d;
-    // this->showCnt++;
-    delete [] this->showDates;
-    this->showDates = tmp;
+    (this->showDates[this->showCnt]) = d;
+    this->showCnt++;
 }
 
 int ShowAnimal::getShowCnt(const Date& start, const Date& end) const {
@@ -354,7 +323,7 @@ int ShowAnimal::getShowCnt(const Date& start, const Date& end) const {
 
     int cnt = 0;
     for (int i = 0; i < this->showCnt; i++) {
-        if ((DateisEarlier(start, *(this->showDates[i])) || DateisEqual(start, *(this->showDates[i]))) && (DateisEarlier(*(this->showDates[i]), end) || DateisEqual(*(this->showDates[i]), end))) {
+        if ((DateisEarlier(start, (this->showDates[i])) || DateisEqual(start, (this->showDates[i]))) && (DateisEarlier((this->showDates[i]), end) || DateisEqual((this->showDates[i]), end))) {
             cnt++;
         }
     }
