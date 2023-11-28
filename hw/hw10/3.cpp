@@ -262,6 +262,7 @@ void DisplayAnimal::print() const {
 class ShowAnimal : public Animal {
 private:
     Date** showDates;
+    int showDatesCap;
     int showCnt;
 public:
     ShowAnimal(int id, Date b, string n);
@@ -278,17 +279,20 @@ public:
 ShowAnimal::ShowAnimal(int id, Date b, string n) : Animal(id, b, n, true) {
     this->showDates = nullptr;
     this->showCnt = 0;
+    this->showDatesCap = 0;
 }
 
 ShowAnimal::ShowAnimal(int id, Date b) : Animal(id, b, "", true) {
     this->showDates = nullptr;
     this->showCnt = 0;
+    this->showDatesCap = 0;
 }
 
 ShowAnimal::ShowAnimal(const ShowAnimal& sa) : Animal(sa) {
     // Copy constructor for ShowAnimal
     this->showCnt = sa.showCnt;
-    this->showDates = new Date*[(sa.showCnt/100 + 1)*100];
+    this->showDates = new Date*[sa.showCnt * 2 + 1];
+    this->showDatesCap = sa.showCnt * 2;
     for (int i = 0; i < this->showCnt; i++) {
         this->showDates[i] = new Date;
         *(this->showDates[i]) = *(sa.showDates[i]);
@@ -313,7 +317,7 @@ void ShowAnimal::addShowDate(const Date& d) {
         if(DateisEqual(d, *(this->showDates[i])))    return;
     }
 
-    if(this->showCnt % 500 != 0){
+    if(this->showCnt < this->showDatesCap){
         // If the array is not full, add the date to the array
         this->showDates[this->showCnt] = new Date;
         *(this->showDates[this->showCnt]) = d;
@@ -321,13 +325,14 @@ void ShowAnimal::addShowDate(const Date& d) {
     }
     else{
         // If the array is full, expand the array and add the date to the array
-        Date** tmp = new Date*[(this->showCnt/500 + 1)*500];
+        Date** tmp = new Date*[this->showCnt * 2 + 1];
         for(int i = 0; i < this->showCnt; i++){
             tmp[i] = this->showDates[i];
         }
         tmp[this->showCnt] = new Date;
         *(tmp[this->showCnt]) = d;
 
+        this->showDatesCap = this->showCnt * 2;
         this->showCnt++;
         
         delete [] this->showDates;
@@ -340,7 +345,8 @@ int ShowAnimal::getShowCnt(const Date& start, const Date& end) const {
 
     int cnt = 0;
     for (int i = 0; i < this->showCnt; i++) {
-        if ((DateisEarlier(start, *(this->showDates[i])) || DateisEqual(start, *(this->showDates[i]))) && (DateisEarlier(*(this->showDates[i]), end) || DateisEqual(*(this->showDates[i]), end))) {
+        if ((DateisEarlier(start, *(this->showDates[i])) || DateisEqual(start, *(this->showDates[i]))) 
+            && (DateisEarlier(*(this->showDates[i]), end) || DateisEqual(*(this->showDates[i]), end))) {
             cnt++;
         }
     }
